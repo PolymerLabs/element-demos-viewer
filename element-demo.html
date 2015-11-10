@@ -1,0 +1,212 @@
+<dom-module id="element-demo">
+  <style>
+    :host {
+      @apply(--paper-font-common-base);
+    }
+
+    .paper-header {
+      color: white;
+      height: 60px;
+      background-color: var(--paper-grey-600);
+    }
+
+    .paper-header > paper-icon-button {
+      margin: 0 0.5em;
+    }
+
+    .content {
+      display: block;
+      position: fixed;
+      top: 60px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    [drawer] {
+      overflow: auto;
+    }
+
+    paper-menu {
+      background: linear-gradient(to right, rgba(240, 240, 240, 1) 0%, rgba(240, 240, 240, 0) 100%);
+    }
+
+    iframe {
+      display: block;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      border: 0;
+    }
+
+    h1 {
+      @apply(--paper-font-display1);
+      margin-left: 270px;
+      margin-right: 10px;
+    }
+
+    paper-item.iron-selected {
+      background-color: #ddd;
+    }
+  </style>
+  <template>
+    <paper-header-panel>
+      <section class="paper-header flex layout horizontal center">
+        <paper-icon-button on-tap="_toggleDrawer" icon="icons:menu"></paper-icon-button>
+        <h4>Polymer Element Demos</h4>
+      </section>
+      <paper-drawer-panel force-narrow class="content" id="drawer">
+        <section drawer>
+          <carbon-router matches=":elementName" element-name="{{selectedElement}}"></carbon-router>
+          <paper-menu attr-for-selected="name" selected="{{selectedElement}}" id="menu">
+            <template is="dom-repeat" items="[[productLines]]" as="productLine">
+              <iron-ajax
+                class="product-line-request"
+                url="[[_productLineJsonUrl(productLine)]]"
+                on-response="_addElements"
+                auto>
+              </iron-ajax>
+            </template>
+
+            <template is="dom-repeat" items="[[elements]]" as="element">
+              <paper-item name="[[element]]">[[element]]</paper-item>
+            </template>
+          </paper-menu>
+        </section>
+
+        <div main>
+          <template is="dom-if" if="[[!selectedElement]]">
+            <h1>Select an element from the list to view the demo for that element.</h1>
+          </template>
+          <template is="dom-if" if="[[selectedElement]]">
+            <iframe id="iframe" src="[[_demoSrcUrlFor(selectedElement)]]"></iframe>
+          </template>
+        </div>
+      </paper-drawer-panel>
+    </paper-header-panel>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'element-demo',
+
+      properties: {
+        productLines: {
+          type: Array,
+          value: function() {
+            return [
+              'iron-elements',
+              'paper-elements',
+              'gold-elements',
+              'neon-elements'
+            ];
+          }
+        },
+
+        polygitConfig: {
+          type: Array,
+          value: function() {
+            return [
+              'polymer+v1.1.1',
+              'paper-elements+:master',
+              'iron-elements+:master',
+              'gold-elements+:master',
+              'web-animations-js+web-animations+:master',
+              'promise-polyfill+polymerlabs+:master'
+            ];
+          }
+        },
+
+        elements: {
+          type: Array,
+          notify: true,
+          value: function() {
+            return [];
+          }
+        },
+
+        selectedElement: {
+          type: Object,
+          notify: true,
+          observer: '_selectedElementChanged'
+        },
+
+        demoSrc: {
+          type: String,
+          notify: true
+        },
+
+        demoUrl: {
+          type: String,
+          notify: true,
+          computed: '_computeDemoUrl(demoSrc, polygitConfig)',
+          observer: '_demoUrlChanged'
+        }
+      },
+
+      get productLineRequestPromises() {
+        return Array.prototype.map.call(
+          Polymer.dom(this.root).querySelectorAll('.product-line-request'),
+          function(ironAjax) {
+            debugger;
+            return ironAjax.lastRequest.completes;
+          }
+        );
+      },
+
+      selectElementByName: function(elementName) {
+        Promise.all(this.productLineRequestPromises).then(function() {
+          var items = Polymer.dom(this.root).querySelectorAll('paper-item');
+
+          for (var i = 0; i < items.length; ++i) {
+            if (items[i].textContent.trim() === elementName) {
+              console.log('Found', elementName);
+              this.$.menu.selected = i;
+              break;
+            }
+          }
+        }.bind(this));
+      },
+
+      _productLineJsonUrl: function(productLine) {
+        return 'https://rawgit.com/PolymerElements/' + productLine + '/master/bower.json';
+      },
+
+      _addElements: function(request) {
+        console.log('Adding elements for ' + request.detail.response.name);
+        for (var key in request.detail.response.dependencies) {
+          console.count(key);
+          this.push('elements', key);
+        }
+      },
+
+      _selectedElementChanged: function(selectedElement) {
+        if (!selectedElement) {
+          this.$.drawer.openDrawer();
+        } else {
+          this.$.drawer.closeDrawer();
+        }
+      },
+
+      _demoSrcUrlFor: function(selectedElement) {
+        if (!selectedElement) {
+          return null;
+        }
+
+        return '//polygit.org/components/' + selectedElement + '/demo/index.html';
+      },
+
+      _demoUrlChanged: function(demoUrl, oldDemoUrl) {
+        if (oldDemoUrl) {
+          URL.revokeObjectURL(oldDemoUrl);
+        }
+      },
+
+      _toggleDrawer: function() {
+        this.$.drawer.togglePanel();
+        this.$.menu.focus();
+      }
+    });
+  </script>
+</dom-module>
