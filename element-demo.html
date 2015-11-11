@@ -100,12 +100,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       --paper-input-container-focus-color: white;
       --paper-input-container-input-color: white;
       margin-left: 20px;
-      width: 100px;
-
-    }
-
-    .search-container {
-      @apply(--layout-horizontal);
+      width: 400px;
     }
 
   </style>
@@ -115,10 +110,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div class="paper-header">
         <paper-icon-button on-tap="_toggleDrawer" icon="icons:menu"></paper-icon-button>
         Polymer Element Demos
-        <!-- <div class="search-container">
-          <paper-input id="search" label="search" no-label-float></paper-input>
-          <paper-icon-button on-tap="_toggleSearch" icon="icons:search"></paper-icon-button>
-        </div> -->
+        <paper-input id="search" label="search" no-label-float list="elements-list" on-keypress="_onInputKeypress"></paper-input>
+        <datalist id="elements-list">
+          <template is="dom-repeat" items="[[elements]]" as="element">
+            <option value="[[element]]"</option>
+          </template>
+        </datalist>
       </div>
 
       <paper-drawer-panel force-narrow class="content" id="drawer">
@@ -213,7 +210,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return Array.prototype.map.call(
           Polymer.dom(this.root).querySelectorAll('.product-line-request'),
           function(ironAjax) {
-            debugger;
             return ironAjax.lastRequest.completes;
           }
         );
@@ -226,7 +222,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for (var i = 0; i < items.length; ++i) {
             if (items[i].textContent.trim() === elementName) {
               console.log('Found', elementName);
-              this.$.menu.selected = i;
+              this.$.menu.selected = elementName;
               break;
             }
           }
@@ -272,8 +268,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.menu.focus();
       },
 
-      _toggleSearch: function() {
-        this.$.search.hidden = !this.$.search.hidden;
+      _onInputKeypress: function(event) {
+        var keyCode = event.keyCode || event.which;
+        if(keyCode == 13) {  //Enter keycode
+          this.selectElementByName(this.$.search.value);
+        }
       }
     });
   </script>
