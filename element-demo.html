@@ -28,10 +28,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     .paper-header {
-      color: white;
       height: 60px;
       font-size: 18px;
+      color: white;
       background-color: var(--paper-blue-500);
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
     }
 
     .paper-header > paper-icon-button {
@@ -58,6 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: transparent;
       };
     }
+
 
     iframe {
       display: block;
@@ -93,11 +96,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   </style>
   <template>
+
     <paper-header-panel>
-      <section class="paper-header flex layout horizontal center">
+      <div class="paper-header">
         <paper-icon-button on-tap="_toggleDrawer" icon="icons:menu"></paper-icon-button>
         Polymer Element Demos
-      </section>
+        <!-- <paper-input label="search" no-label-float></paper-input> -->
+      </div>
+
       <paper-drawer-panel force-narrow class="content" id="drawer">
         <section drawer>
           <carbon-router matches=":elementName" element-name="{{selectedElement}}"></carbon-router>
@@ -128,7 +134,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </paper-drawer-panel>
     </paper-header-panel>
   </template>
-
   <script>
     Polymer({
       is: 'element-demo',
