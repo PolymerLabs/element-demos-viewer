@@ -30,14 +30,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     .paper-header {
       height: 60px;
       font-size: 18px;
+      padding-left: 0.5em;
       color: white;
       background-color: var(--paper-blue-500);
       @apply(--layout-horizontal);
       @apply(--layout-center);
     }
 
-    .paper-header > paper-icon-button {
-      margin: 0 0.5em;
+    paper-icon-button {
+      margin: 0;
     }
 
     .content {
@@ -94,6 +95,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       background-color: var(--paper-blue-50);
     }
 
+    paper-input {
+      --paper-input-container-color: white;
+      --paper-input-container-focus-color: white;
+      --paper-input-container-input-color: white;
+      margin-left: 20px;
+      width: 100px;
+
+    }
+
+    .search-container {
+      @apply(--layout-horizontal);
+    }
+
   </style>
   <template>
 
@@ -101,7 +115,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div class="paper-header">
         <paper-icon-button on-tap="_toggleDrawer" icon="icons:menu"></paper-icon-button>
         Polymer Element Demos
-        <!-- <paper-input label="search" no-label-float></paper-input> -->
+        <!-- <div class="search-container">
+          <paper-input id="search" label="search" no-label-float></paper-input>
+          <paper-icon-button on-tap="_toggleSearch" icon="icons:search"></paper-icon-button>
+        </div> -->
       </div>
 
       <paper-drawer-panel force-narrow class="content" id="drawer">
@@ -253,6 +270,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _toggleDrawer: function() {
         this.$.drawer.togglePanel();
         this.$.menu.focus();
+      },
+
+      _toggleSearch: function() {
+        this.$.search.hidden = !this.$.search.hidden;
       }
     });
   </script>
